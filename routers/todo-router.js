@@ -31,7 +31,7 @@ router.post("/", (req, res) => {
 });
 
 router.delete("/:id", (req, res) => {
-  const id = req.params.id;
+  const id = req.params.id; //string
   const deletingItem = todos.find((todo) => todo.id == id);
   if (!deletingItem) {
     return res.status(404).send({ message: "Todo not found" });
