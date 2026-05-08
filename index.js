@@ -1,71 +1,59 @@
 import express from "express";
+import fs from "fs";
+import { nanoid } from "nanoid";
+
+import todoRouter from "./routers/todo-router.js";
 
 const app = express();
 app.use(express.json());
 
-const todos = [{ id: 1, name: "Sereh", checked: true }];
+app.use("/api/todos", todoRouter);
 
-app.get("/", (req, res) => {
-  return res.send(todos);
+const userData = fs.readFileSync("./users.json", "utf-8");
+
+let users = JSON.parse(userData);
+
+const updateUserFile = () => {
+  fs.writeFileSync("./users.json", JSON.stringify(users), "utf-8");
+};
+
+app.get("/api/users", (req, res) => {
+  return res.send(users);
 });
 
-app.post("/", (req, res) => {
-  const { name, checked } = req.body;
-  const newId = todos.length > 0 ? todos[todos.length - 1].id + 1 : 1;
-  const newTodo = {
-    id: newId,
-    name,
-    checked,
+app.post("/api/users", (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res
+      .status(400)
+      .send({ message: "Body must have username and password" });
+  }
+
+  const existingUser = users.find((user) => user.username === username);
+
+  if (existingUser) {
+    return res.status(400).send({ message: "Username already exists" });
+  }
+
+  const regex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
+
+  if (!regex.test(password)) {
+    return res.status(400).send({
+      message:
+        "Password must have minimum of 8 letters, a number, and a special character",
+    });
+  }
+  const newUser = {
+    id: nanoid(),
+    username,
+    password,
   };
-
-  todos.push(newTodo);
-  return res.send(newTodo);
-});
-app.patch("/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const { name, checked } = req.body;
-
-  const todo = todos.find((item) => item.id === id);
-
-  if (!todo) {
-    return res.status(404).send({ message: "Todo not found" });
-  }
-
-  if (name !== undefined) todo.name = name;
-  if (checked !== undefined) todo.checked = checked;
-
-  return res.send(todo);
-});
-app.delete("/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-
-  const index = todos.findIndex((item) => item.id === id);
-
-  if (index === -1) {
-    return res.status(404).send({ message: "Todo not found" });
-  }
-
-  const deletedTodo = todos.splice(index, 1);
-
-  return res.send(deletedTodo[0]);
+  users.push(newUser);
+  updateUserFile();
+  return res.send(newUser);
 });
 
-app.get("/:id", (req, res) => {
-  const id = req.params.id;
-  const todo = todos.find((item) => item.id == id);
-  if (!todo) {
-    return res.status(404).send({ message: "Not found" });
-  }
-  return res.send(todo);
+app.listen(5400, () => {
+  console.log("Server is running on http://localhost:5400");
 });
-
-app.listen(5500, () => {
-  console.log("App is running on http://localhost:5500");
-});
-
-// TODO:
-// id, name, checked
-
-// REST API
-// USTGAH
-// ZASAH
