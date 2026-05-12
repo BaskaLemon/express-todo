@@ -1,7 +1,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { UserModel } from "../models/user-model.js";
+import { UserModel } from "../models/user-models.js";
 import { nanoid } from "nanoid";
 
 const router = express.Router();

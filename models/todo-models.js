@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { nanoid } from "nanoid";
 
 const TodoSchema = new mongoose.Schema({
   _id: { type: String },

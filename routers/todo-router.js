@@ -1,6 +1,7 @@
 import express from "express";
 import { nanoid } from "nanoid";
-import { TodoModel } from "../models/todo-models";
+import { auth } from "../auth-middleware.js";
+import { TodoModel } from "../models/todo-models.js";
 
 const router = express.Router();
 

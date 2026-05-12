@@ -1,4 +1,3 @@
-import fs from "fs";
 import jwt from "jsonwebtoken";
 import { UserModel } from "./models/user-models.js";
 

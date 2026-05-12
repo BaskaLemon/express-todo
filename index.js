@@ -4,7 +4,7 @@ import fs from "fs";
 import todoRouter from "./routers/todo-router.js";
 import authRouter from "./routers/auth-router.js";
 import mongoose from "mongoose";
-import { UserModel } from "./models/user-model.js";
+import { UserModel } from "./models/user-models.js";
 
 const app = express();
 app.use(express.json());
