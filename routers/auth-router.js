@@ -67,7 +67,7 @@ router.post("/signin", async (req, res) => {
   const { password: hashedPassword, ...userWithoutPassword } =
     existingUser.toJSON;
 
-  const accessToken = jwt.sign(userWithoutPassword, "MySecret", {
+  const accessToken = jwt.sign(userWithoutPassword, process.env.AUTH_SECRET, {
     expiresIn: "5m",
   });
 
@@ -83,7 +83,7 @@ router.get("/me", (req, res) => {
 
   let payload = null;
   try {
-    payload = jwt.verify(token, "MySecret");
+    payload = jwt.verify(token, process.env.AUTH_SECRET);
   } catch (e) {
     return res.status(401).send({ message: "Invalid token" });
   }
