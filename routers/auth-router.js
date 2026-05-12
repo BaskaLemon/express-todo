@@ -1,19 +1,11 @@
 import express from "express";
-import fs from "fs";
-import { nanoid } from "nanoid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
-const userData = fs.readFileSync("./users.json", "utf-8");
-let users = JSON.parse(userData);
-
-const updateUserFile = () => {
-  fs.writeFileSync("./users.json", JSON.stringify(users), "utf-8");
-};
+import { UserModel } from "./models/user-model.js";
 
 const router = express.Router();
 
-router.post("/signup", (req, res) => {
+router.post("/signup", async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res
@@ -21,7 +13,7 @@ router.post("/signup", (req, res) => {
       .send({ message: "Body must have username and password" });
   }
 
-  const existingUser = users.find((user) => user.username === username);
+  const existingUser = await UserModel.findOne({ username: username });
 
   if (existingUser) {
     return res.status(400).send({ message: "Username already exists" });
@@ -44,17 +36,14 @@ Password must contain:
 
   const hashedPassword = bcrypt.hashSync(password, 10);
 
-  const newUser = {
-    id: nanoid(),
+  const newUser = await UserModel.create({
     username,
     password: hashedPassword,
-  };
-  users.push(newUser);
-  updateUserFile();
+  });
   return res.send(newUser);
 });
 
-router.post("/signin", (req, res) => {
+router.post("/signin", async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res
@@ -62,7 +51,7 @@ router.post("/signin", (req, res) => {
       .send({ message: "Body must have username and password" });
   }
 
-  const existingUser = users.find((user) => user.username === username);
+  const existingUser = await UserModel.findOne({ username: username });
 
   if (!existingUser) {
     return res.status(401).send({ message: "Wrong credentials" });
