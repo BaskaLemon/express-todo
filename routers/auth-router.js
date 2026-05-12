@@ -1,7 +1,8 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { UserModel } from "./models/user-model.js";
+import { UserModel } from "../models/user-model.js";
+import { nanoid } from "nanoid";
 
 const router = express.Router();
 
@@ -37,6 +38,7 @@ Password must contain:
   const hashedPassword = bcrypt.hashSync(password, 10);
 
   const newUser = await UserModel.create({
+    _id: nanoid(),
     username,
     password: hashedPassword,
   });
@@ -62,7 +64,8 @@ router.post("/signin", async (req, res) => {
   if (!isMatching) {
     return res.status(401).send({ message: "Wrong credentials" });
   }
-  const { password: hashedPassword, ...userWithoutPassword } = existingUser;
+  const { password: hashedPassword, ...userWithoutPassword } =
+    existingUser.toJSON;
 
   const accessToken = jwt.sign(userWithoutPassword, "MySecret", {
     expiresIn: "5m",
