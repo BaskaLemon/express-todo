@@ -74,21 +74,24 @@ router.post("/signin", async (req, res) => {
   return res.send({ message: "Successfully signedin", accessToken });
 });
 
-router.get("/me", (req, res) => {
+router.get("/me", async (req, res) => {
   const rawToken = req.headers.authorization;
+
   if (!rawToken.startsWith("Bearer")) {
     return res.status(401).send({ message: "Invalid token" });
   }
+
   const token = rawToken.split(" ")[1];
 
   let payload = null;
+
   try {
     payload = jwt.verify(token, process.env.AUTH_SECRET);
   } catch (e) {
     return res.status(401).send({ message: "Invalid token" });
   }
 
-  const existingUser = users.find((user) => user.id === payload.id);
+  const existingUser = await UserModel.findById(payload._id);
 
   return res.send(existingUser);
 });
